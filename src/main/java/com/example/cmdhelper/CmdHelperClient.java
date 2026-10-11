@@ -23,6 +23,31 @@ import java.util.Map;
 
 public class CmdHelperClient implements ClientModInitializer {
 
+    /** 마검 (단일 인용부호 SNBT 사용) */
+    private static final String MAGUM = "give @s netherite_sword["
+        + "custom_name={text:'마검 · 암흑의 칼날',color:'dark_purple',bold:true,italic:false},"
+        + "lore=[{text:'어둠이 깃든 전설의 검',color:'gray',italic:false}],"
+        + "enchantments={sharpness:10,fire_aspect:3,looting:5,sweeping_edge:5,unbreaking:10,mending:1},"
+        + "unbreakable={},enchantment_glint_override=true,"
+        + "attribute_modifiers=[{type:'attack_damage',id:'cmdhelper:magum_dmg',amount:30,operation:'add_value',slot:'mainhand'},"
+        + "{type:'attack_speed',id:'cmdhelper:magum_spd',amount:-1,operation:'add_value',slot:'mainhand'}]]";
+
+    /** 여러 명령을 연달아 실행: /이름 */
+    private static final Map<String, String[]> MULTI = Map.of(
+        "kit", new String[] {
+            "give @s netherite_helmet[enchantments={protection:4,unbreaking:3,mending:1,respiration:3,aqua_affinity:1}]",
+            "give @s netherite_chestplate[enchantments={protection:4,unbreaking:3,mending:1}]",
+            "give @s netherite_leggings[enchantments={protection:4,unbreaking:3,mending:1,swift_sneak:3}]",
+            "give @s netherite_boots[enchantments={protection:4,unbreaking:3,mending:1,feather_falling:4,depth_strider:3,soul_speed:3}]",
+            "give @s netherite_pickaxe[enchantments={efficiency:5,unbreaking:3,fortune:3,mending:1}]",
+            "give @s netherite_axe[enchantments={efficiency:5,unbreaking:3,sharpness:5,mending:1}]"
+        },
+        "bye", new String[] {
+            "execute as @a at @s run summon lightning_bolt ~ ~ ~",
+            "execute as @a at @s run summon tnt ~ ~ ~ {fuse:20}"
+        }
+    );
+
     /** 단순 별칭: /이름  →  서버 명령어 */
     private static final Map<String, String> ALIASES = Map.ofEntries(
         Map.entry("gmc", "gamemode creative"),
@@ -35,7 +60,26 @@ public class CmdHelperClient implements ClientModInitializer {
         Map.entry("sun", "weather clear"),
         Map.entry("rain", "weather rain"),
         Map.entry("keepinv", "gamerule keep_inventory true"),
-        Map.entry("cll", "clear @s")
+        Map.entry("cll", "clear @s"),
+        // ── 재미용 ──
+        Map.entry("thunderall", "execute as @a at @s run summon lightning_bolt ~ ~ ~"),
+        Map.entry("thunderme", "execute at @s run summon lightning_bolt ~ ~ ~"),
+        Map.entry("thundermobs", "execute at @e[type=!player,distance=..40] run summon lightning_bolt ~ ~ ~"),
+        Map.entry("storm", "weather thunder"),
+        Map.entry("god", "effect give @s resistance infinite 255 true"),
+        Map.entry("speed", "effect give @s speed infinite 5 true"),
+        Map.entry("jump", "effect give @s jump_boost infinite 5 true"),
+        Map.entry("nv", "effect give @s night_vision infinite 0 true"),
+        Map.entry("heal", "effect give @s instant_health 1 10 true"),
+        Map.entry("feed", "effect give @s saturation 1 20 true"),
+        Map.entry("clearfx", "effect clear @s"),
+        Map.entry("rocket", "effect give @s levitation 4 40 true"),
+        Map.entry("boom", "execute at @s run summon tnt ~ ~ ~ {fuse:0}"),
+        Map.entry("boomall", "execute as @a at @s run summon tnt ~ ~ ~ {fuse:0}"),
+        Map.entry("rtp", "spreadplayers 0 0 100 10000 false @s"),
+        Map.entry("apple", "give @s enchanted_golden_apple 64"),
+        Map.entry("totem", "give @s totem_of_undying 8"),
+        Map.entry("magum", MAGUM)
     );
 
     @Override
@@ -44,9 +88,31 @@ public class CmdHelperClient implements ClientModInitializer {
     }
 
     private void register(CommandDispatcher<FabricClientCommandSource> d) {
+        Extras.register(d);
         // 1) 단순 별칭
         ALIASES.forEach((name, cmd) ->
             d.register(ClientCommands.literal(name).executes(c -> { run(c.getSource(), cmd); return 1; })));
+
+        MULTI.forEach((name, cmds) ->
+            d.register(ClientCommands.literal(name).executes(cx -> {
+                for (String s : cmds) run(cx.getSource(), s);
+                return 1;
+            })));
+
+        // /head <닉네임> : 플레이어 머리
+        d.register(ClientCommands.literal("head")
+            .then(ClientCommands.argument("name", StringArgumentType.word())
+                .executes(cx -> { run(cx.getSource(), "give @s player_head[profile='" + StringArgumentType.getString(cx, "name") + "']"); return 1; })));
+
+        // /cmdhelp : 전체 명령어 목록
+        d.register(ClientCommands.literal("cmdhelp").executes(cx -> {
+            msg(cx.getSource(), "§6[단축] §f" + String.join(" ", ALIASES.keySet().stream().sorted().map(s -> "/" + s).toList()));
+            msg(cx.getSource(), "§6[세트] §f/kit /bye");
+            msg(cx.getSource(), "§6[인자] §f/tpu N, /gi 아이템 [개수], /ke [반경], /ki [반경], /head 닉네임, /here");
+            msg(cx.getSource(), "§6[추가] §f/cb x y z, /cbnear, /im 아이템 모델, /imh 모델, /cmd 아이템 숫자, /gimmick, /exec, /nether, /chunk, /copyxyz, /stack, /ticks, /dice, /coin, /shrug, /tableflip, /mark /marks /tpmark /unmark");
+            msg(cx.getSource(), "§6[NBT] §f/nbt explain|list|comp|hand|entity|block");
+            return 1;
+        }));
 
         // 2) /tpu <칸>  : 위로 N칸 순간이동
         d.register(ClientCommands.literal("tpu")
