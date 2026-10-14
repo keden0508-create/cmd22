@@ -9,3 +9,14 @@ GitHub 웹사이트에서 이 폴더 내용을 업로드 → Actions 탭에서 b
 ## 추가 기능
 /cb x y z · /cbnear (커맨드블록 열기), /im /imh /cmd (item_model·custom_model_data give),
 /gimmick (맵 제작 기믹 사전), /exec (execute 사전), /nether /chunk /copyxyz /stack /ticks /dice /coin /shrug /tableflip /mark /marks /tpmark /unmark
+
+## 도구
+/again /hist /repeat /after /macro, /pos1 /pos2 /posvol /fillcmd /fillrun /clonecmd,
+/sel (선택자 사전) /snip (데이터팩 스니펫) /snbt (괄호 검사), /hud /track /stopwatch, /rainbow /box
+
+## 지우기
+/macro del 이름 · /macro clear · /hist clear · /unmark 이름 · /unmark all · /posclear · /after clear · /track off
+
+## AKM
+/akm give → 네더라이트 괭이 "AKM". 들고 우클릭 꾹 = 연사, 맞으면 한 방. 총알은 파티클.
+/akm public · /akm mode kill|damage · /akm rate 1~20 · /akm recoil

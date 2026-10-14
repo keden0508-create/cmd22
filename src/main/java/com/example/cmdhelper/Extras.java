@@ -27,8 +27,8 @@ import java.util.regex.Pattern;
 
 /** 커맨드블록 열기 / item_model / 사전 / 잡다한 편의 기능 */
 public final class Extras {
-    private record Mark(double x, double y, double z, String dim) {}
-    private static final Map<String, Mark> MARKS = new LinkedHashMap<>();
+    record Mark(double x, double y, double z, String dim) {}
+    static final Map<String, Mark> MARKS = new LinkedHashMap<>();
     private static final Random RNG = new Random();
 
     private Extras() {}
@@ -170,6 +170,11 @@ public final class Extras {
                 return 1;
             })));
         d.register(ClientCommands.literal("unmark")
+            .then(ClientCommands.literal("all").executes(c -> {
+                MARKS.clear();
+                msg(c.getSource(), "§7저장된 위치를 모두 지웠습니다.");
+                return 1;
+            }))
             .then(ClientCommands.argument("name", StringArgumentType.word()).executes(c -> {
                 MARKS.remove(StringArgumentType.getString(c, "name"));
                 msg(c.getSource(), "§7삭제했습니다.");
@@ -178,7 +183,7 @@ public final class Extras {
     }
 
     // ───────── helpers ─────────
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<FabricClientCommandSource> dictCmd(
+    static com.mojang.brigadier.builder.LiteralArgumentBuilder<FabricClientCommandSource> dictCmd(
             String name, Map<String, String> dict, String title) {
         return ClientCommands.literal(name)
             .executes(c -> {
@@ -218,7 +223,7 @@ public final class Extras {
         return 1;
     }
 
-    private static String f(double v) { return String.format("%.1f", v); }
-    private static void run(FabricClientCommandSource s, String cmd) { s.getClient().getConnection().sendCommand(cmd); }
-    private static void msg(FabricClientCommandSource s, String m) { s.sendFeedback(Component.literal(m)); }
+    static String f(double v) { return String.format("%.1f", v); }
+    static void run(FabricClientCommandSource s, String cmd) { s.getClient().getConnection().sendCommand(cmd); }
+    static void msg(FabricClientCommandSource s, String m) { s.sendFeedback(Component.literal(m)); }
 }

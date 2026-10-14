@@ -84,11 +84,15 @@ public class CmdHelperClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        Tools.init();
+        Gun.init();
         ClientCommandRegistrationCallback.EVENT.register((d, ctx) -> register(d));
     }
 
     private void register(CommandDispatcher<FabricClientCommandSource> d) {
         Extras.register(d);
+        Tools.register(d);
+        Gun.register(d);
         // 1) 단순 별칭
         ALIASES.forEach((name, cmd) ->
             d.register(ClientCommands.literal(name).executes(c -> { run(c.getSource(), cmd); return 1; })));
@@ -110,6 +114,8 @@ public class CmdHelperClient implements ClientModInitializer {
             msg(cx.getSource(), "§6[세트] §f/kit /bye");
             msg(cx.getSource(), "§6[인자] §f/tpu N, /gi 아이템 [개수], /ke [반경], /ki [반경], /head 닉네임, /here");
             msg(cx.getSource(), "§6[추가] §f/cb x y z, /cbnear, /im 아이템 모델, /imh 모델, /cmd 아이템 숫자, /gimmick, /exec, /nether, /chunk, /copyxyz, /stack, /ticks, /dice, /coin, /shrug, /tableflip, /mark /marks /tpmark /unmark");
+            msg(cx.getSource(), "§6[도구] §f/again /hist /repeat N 명령 /after 10s 명령 /macro save|run|list|del /pos1 /pos2 /posvol /fillcmd /fillrun /clonecmd /sel /snip /snbt /hud /track /stopwatch /rainbow /box");
+            msg(cx.getSource(), "§6[총] §f/akm give (네더라이트 괭이 AKM, 우클릭 연사, 한 방)");
             msg(cx.getSource(), "§6[NBT] §f/nbt explain|list|comp|hand|entity|block");
             return 1;
         }));

@@ -8,6 +8,11 @@ public final class Dicts {
     public static final Map<String, String> GIMMICK = new LinkedHashMap<>();
     public static final Map<String, String> EXEC = new LinkedHashMap<>();
 
+    public static final Map<String, String> SEL = new LinkedHashMap<>();
+    public static final Map<String, String> SNIP = new LinkedHashMap<>();
+
+    private static void s(String k, String v) { SEL.put(k, v); }
+    private static void n(String k, String v) { SNIP.put(k, v); }
     private static void g(String k, String v) { GIMMICK.put(k, v); }
     private static void e(String k, String v) { EXEC.put(k, v); }
 
@@ -84,6 +89,50 @@ public final class Dicts {
         e("예시_공격자", "execute as @e[type=zombie] on attacker run say 때렸다");
         e("예시_범위", "execute as @a at @s as @e[type=zombie,distance=..5] run kill @s");
         e("예시_지표", "execute positioned 0 0 0 over world_surface run summon marker ~ ~ ~");
+    }
+
+
+    static {
+        // ───────── 선택자 사전 ─────────
+        s("@p", "가장 가까운 플레이어");
+        s("@r", "무작위 플레이어 (type= 로 엔티티도 가능)");
+        s("@a", "모든 플레이어");
+        s("@e", "모든 엔티티 (살아있는 것 + 아이템 + 마커 등)");
+        s("@s", "명령을 실행하는 자기 자신");
+        s("type", "엔티티 종류. @e[type=zombie] / type=!player (제외) / type=#minecraft:skeletons (태그)");
+        s("distance", "거리. distance=..5 (5칸 이내) / distance=3..10");
+        s("x y z", "기준 좌표. @e[x=0,y=64,z=0,distance=..10]");
+        s("dx dy dz", "x y z 에서 뻗는 직육면체 범위. @a[x=0,y=64,z=0,dx=10,dy=5,dz=10]");
+        s("tag", "태그. @e[tag=boss] / tag=!boss / tag= (태그 없는 것)");
+        s("name", "이름. @e[name=\"홍길동\"] / name=!홍길동");
+        s("team", "팀. @a[team=red] / team=!red / team= (팀 없는 것)");
+        s("scores", "점수. @a[scores={kills=5..}] / scores={a=1,b=..3}");
+        s("nbt", "엔티티 NBT. @e[nbt={Invulnerable:1b}] (플레이어는 일부 제한)");
+        s("level", "경험치 레벨. @a[level=10..]");
+        s("gamemode", "게임모드. @a[gamemode=survival] / gamemode=!creative");
+        s("limit", "최대 개수. @e[type=zombie,limit=3]");
+        s("sort", "정렬: nearest(가까운 순) / furthest / random / arbitrary");
+        s("x_rotation", "상하 시선 각도. @a[x_rotation=-90..-45] (위를 봄)");
+        s("y_rotation", "좌우 방향 각도. @a[y_rotation=-45..45] (대략 남쪽)");
+        s("predicate", "프레디케이트 조건. @a[predicate=ns:is_night]");
+        s("advancements", "발전과제. @a[advancements={minecraft:story/mine_stone=true}]");
+        s("!", "부정. 많은 인자 앞에 ! 를 붙이면 '아닌 것'");
+        s("범위", "N.. (이상) / ..N (이하) / A..B (사이)");
+
+        // ───────── 데이터팩 스니펫 ─────────
+        n("경로", "data/네임스페이스/function/a.mcfunction, predicate/, loot_table/, advancement/, recipe/ (폴더명은 단수형)");
+        n("tick", "매 틱 실행: data/minecraft/tags/function/tick.json → {\"values\":[\"ns:loop\"]}");
+        n("load", "월드 로드 시 실행: data/minecraft/tags/function/load.json → {\"values\":[\"ns:init\"]}");
+        n("predicate_밤", "{\"condition\":\"minecraft:time_check\",\"value\":{\"min\":13000,\"max\":23000},\"period\":24000}");
+        n("predicate_비", "{\"condition\":\"minecraft:weather_check\",\"raining\":true}");
+        n("predicate_확률", "{\"condition\":\"minecraft:random_chance\",\"chance\":0.3}");
+        n("predicate_좀비", "{\"condition\":\"minecraft:entity_properties\",\"entity\":\"this\",\"predicate\":{\"type\":\"minecraft:zombie\"}}");
+        n("predicate_서바이벌", "{\"condition\":\"minecraft:entity_properties\",\"entity\":\"this\",\"predicate\":{\"type_specific\":{\"type\":\"minecraft:player\",\"gamemode\":[\"survival\"]}}}");
+        n("loot_table", "{\"pools\":[{\"rolls\":1,\"entries\":[{\"type\":\"minecraft:item\",\"name\":\"minecraft:diamond\"}]}]}  → loot give @s loot ns:이름");
+        n("advancement_신호", "명령으로 줄 수 있는 발전과제: {\"criteria\":{\"x\":{\"trigger\":\"minecraft:impossible\"}},\"rewards\":{\"function\":\"ns:reward\"}} → advancement grant @s only ns:이름");
+        n("recipe_무형", "{\"type\":\"minecraft:crafting_shapeless\",\"ingredients\":[\"minecraft:stick\"],\"result\":{\"id\":\"minecraft:diamond\",\"count\":1}}");
+        n("function_매개", "function ns:f with storage ns:args  (매크로 함수: 줄 앞에 $ , 값은 $(변수))");
+        n("reload", "데이터팩 수정 후 /reload");
     }
 
     private Dicts() {}
